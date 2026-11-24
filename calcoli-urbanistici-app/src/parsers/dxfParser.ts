@@ -239,12 +239,12 @@ export function parseDxf(contenuto: string, unita: UnitaDisegno = 'm', datiBase?
   };
 }
 
-export function leggiDxfDaFile(file: File, unita: UnitaDisegno): Promise<EsitoDxf> {
+export function leggiDxfDaFile(file: File, unita: UnitaDisegno, datiBase?: DatiProgetto): Promise<EsitoDxf> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        resolve(parseDxf(String(reader.result ?? ''), unita));
+        resolve(parseDxf(String(reader.result ?? ''), unita, datiBase));
       } catch (err) {
         reject(err);
       }

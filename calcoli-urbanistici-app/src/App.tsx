@@ -1,122 +1,51 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useMemo, useState } from 'react';
+import { datiProgettoDefault, profiloPRGDefault } from './data/prgDefault';
+import type { DatiProgetto, ProfiloPRG, StatoSemafori } from './types/urbanistica';
+import type { UnitaDisegno } from './parsers/dxfParser';
+import { calcolaTutto } from './engine/motoreUrbanistico';
+import { Header, type IndiceTab } from './components/Header';
+import { SchedaParametriPRG } from './components/SchedaParametriPRG';
+import { SchedaDatiProgetto } from './components/SchedaDatiProgetto';
+import { SchedaQuadroSinottico } from './components/SchedaQuadroSinottico';
+import { SchedaRelazioneExport } from './components/SchedaRelazioneExport';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [prg, setPrg] = useState<ProfiloPRG>(profiloPRGDefault);
+  const [dati, setDati] = useState<DatiProgetto>(datiProgettoDefault);
+  const [unita, setUnita] = useState<UnitaDisegno>('m');
+  const [tab, setTab] = useState<IndiceTab>(2);
+
+  const esito = useMemo(() => calcolaTutto(prg, dati), [prg, dati]);
+
+  const stato: StatoSemafori = {
+    conformitaUrbanistica: esito.conformeEdificabilita && esito.mixFunzionaleConforme,
+    standard: esito.standard.conformeStandard,
+    parcheggiL122: esito.parcheggi.conforme,
+    suoloDistanze: esito.sagoma.conforme,
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div className="app">
+      <Header
+        prgComune={prg.comune}
+        prgZona={prg.zona}
+        nomeProgetto={dati.nomeProgetto}
+        unita={unita}
+        onChangeUnita={setUnita}
+        tab={tab}
+        onChangeTab={setTab}
+        stato={stato}
+      />
+      <main className="contenuto">
+        {tab === 0 && <SchedaParametriPRG prg={prg} onChange={setPrg} />}
+        {tab === 1 && <SchedaDatiProgetto dati={dati} unita={unita} onChange={setDati} />}
+        {tab === 2 && <SchedaQuadroSinottico prg={prg} dati={dati} esito={esito} />}
+        {tab === 3 && <SchedaRelazioneExport prg={prg} dati={dati} esito={esito} stato={stato} />}
+      </main>
+      <footer className="app-footer" data-stampa>
+        Calcoli secondo Regolamento Edilizio Tipo (RET) e NTA comunali — strumento di supporto preliminare agli adempimenti edilizi (CILA, SCIA, PdC); gli esiti non sostituiscono la verifica del professionista.
+      </footer>
+    </div>
+  );
 }
-
-export default App

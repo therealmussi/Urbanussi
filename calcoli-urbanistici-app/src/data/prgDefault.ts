@@ -122,3 +122,18 @@ export const datiProgettoDefault: DatiProgetto = {
     distanzaStrade_m: 6.0,
   },
 };
+
+export function creaDatiProgettoVuoto(nomeProgetto = 'Progetto da DXF'): DatiProgetto {
+  return {
+    nomeProgetto,
+    tipoIntervento: 'nuova_costruzione',
+    superficieTerritoriale_St: 0,
+    superficieFondiaria_Sf: 0,
+    superficieCoperta_Sc: 0,
+    superficiPermeabili: [],
+    piani: [],
+    standardReperitiInCessione: { verde_mq: 0, servizi_mq: 0, parcheggiPubblici_mq: 0 },
+    parcheggiPrivatiProgetto: { stalli_mq: 0, manovra_mq: 0 },
+    sagomaEDistanze: { altezzaProgetto_m: 0, distanzaConfini_m: 0, distanzaFabbricati_m: 0, distanzaStrade_m: 0 },
+  };
+}
