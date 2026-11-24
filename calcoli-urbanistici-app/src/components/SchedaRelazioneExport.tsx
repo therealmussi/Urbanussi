@@ -80,6 +80,8 @@ export function SchedaRelazioneExport({ prg, dati, esito, stato }: Props) {
         <CampoRelazione etichetta="Rapporto di copertura" valore={`${esito.sagoma.rapportoCopertura_perc.toFixed(2)}% (max ${prg.parametriEdificatori.rapportoCoperturaMax_perc}%)`} />
         <CampoRelazione etichetta="Permeabilità" valore={`${esito.sagoma.indicePermeabilita_perc.toFixed(2)}% (min ${prg.parametriEdificatori.indicePermeabilitaMin_perc}%)`} />
         <CampoRelazione etichetta="Esito suolo/distanze" valore={percorso(stato.suoloDistanze)} />
+
+        <p className="relazione-firma">Elaborati predisposti con applicativo sviluppato da Matteo Mussillon</p>
       </div>
     </div>
   );

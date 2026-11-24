@@ -1,5 +1,7 @@
 # Calcoli Urbanistici & Planivolumetrici
 
+Sviluppato da Matteo Mussillon
+
 SPA client-side in React + TypeScript + Vite per il calcolo automatico degli indici urbanistici ed edilizi (SLP, scomputi con tetto logge, volume, mix funzionale, standard D.M. 1444/68 con monetizzazione, parcheggi L. 122/89, copertura, permeabilità, distanze) secondo il RET e le NTA comunali.
 
 La specifica completa è in [SPEC_PROGETTO.md](./SPEC_PROGETTO.md).

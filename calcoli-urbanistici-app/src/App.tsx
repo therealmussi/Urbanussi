@@ -81,6 +81,7 @@ export default function App() {
       </main>
       <footer className="app-footer" data-stampa>
         Calcoli secondo Regolamento Edilizio Tipo (RET) e NTA comunali — strumento di supporto preliminare agli adempimenti edilizi (CILA, SCIA, PdC); gli esiti non sostituiscono la verifica del professionista.
+        <span className="firma">Sviluppato da Matteo Mussillon</span>
       </footer>
     </div>
   );
