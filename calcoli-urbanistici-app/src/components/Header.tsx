@@ -1,14 +1,6 @@
 import type { StatoSemafori } from '../types/urbanistica';
 import type { UnitaDisegno } from '../parsers/dxfParser';
-
-export const TAB = [
-  'Parametri PRG / NTA',
-  'Dati Progetto & DXF',
-  'Quadro Sinottico',
-  'Relazione & Export',
-] as const;
-
-export type IndiceTab = 0 | 1 | 2 | 3;
+import { TAB, type IndiceTab } from '../tabs';
 
 interface HeaderProps {
   prgComune: string;

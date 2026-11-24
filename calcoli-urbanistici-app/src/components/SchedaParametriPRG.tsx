@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Download, Upload, Sparkles, FileJson } from 'lucide-react';
 import type { DestinazioneUso, ProfiloPRG } from '../types/urbanistica';
 import { DESTINAZIONI, LABEL_DESTINAZIONI } from '../types/urbanistica';
@@ -17,14 +17,10 @@ type ChiaviParcheggi = keyof ProfiloPRG['parcheggiPrivati'];
 
 export function SchedaParametriPRG({ prg, onChange }: Props) {
   const [testoNTA, setTestoNTA] = useState('');
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState(() => leggiApiKey());
   const [messaggio, setMessaggio] = useState<{ ok: boolean; testo: string } | null>(null);
   const [caricamento, setCaricamento] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setApiKey(leggiApiKey());
-  }, []);
 
   const aggiorna = <K extends ChiaviParametri>(chiave: K, valore: ProfiloPRG['parametriEdificatori'][K]) => {
     onChange({ ...prg, parametriEdificatori: { ...prg.parametriEdificatori, [chiave]: valore } });
