@@ -294,3 +294,34 @@ describe('round', () => {
     expect(round(0.1 + 0.2, 6)).toBe(0.3);
   });
 });
+
+describe('valori negativi e scomputi anomali', () => {
+  it('ignora SLP negative e scomputi negativi', () => {
+    const dati = cloneD(datiProgettoDefault);
+    dati.piani = [
+      {
+        id: 'p1',
+        nomePiano: 'P1',
+        slpLorda: { residenziale: -500, commerciale: 400, direzionale: 0, produttivo: 0, turistico: 0 },
+        scomputi: { murature_mq: -100, loggePorticati_mq: -50, vaniScala_mq: 0, interrati_mq: 0 },
+      },
+    ];
+    dati.superficiPermeabili = [{ descrizione: 'x', area_mq: -100, coefficiente_0_1: 0.5 }];
+    dati.parcheggiPrivatiProgetto = { stalli_mq: -10, manovra_mq: -5 };
+    const esito = calcolaTutto(profiloPRGDefault, dati);
+    expect(esito.slpLordaTot).toBe(400);
+    expect(esito.scompMuri).toBe(0);
+    expect(esito.sagoma.superficiePonderataPermeabile_mq).toBeGreaterThanOrEqual(0);
+    expect(esito.parcheggi.totaleProgettoPrivati_mq).toBeGreaterThanOrEqual(0);
+    expect(Number.isFinite(esito.volumeProgetto_mc)).toBe(true);
+  });
+
+  it('gestisce scomputi molto maggiori della SLP lorda senza NaN', () => {
+    const dati = cloneD(datiProgettoDefault);
+    dati.piani.forEach((p) => { p.scomputi.murature_mq = 99999; });
+    const esito = calcolaTutto(profiloPRGDefault, dati);
+    expect(esito.slpNettaTot).toBe(0);
+    expect(esito.volumeProgetto_mc).toBe(0);
+    expect(Number.isFinite(esito.standard.abitantiTeoriciTot)).toBe(true);
+  });
+});

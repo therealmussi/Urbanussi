@@ -92,12 +92,12 @@ export function calcolaScomputiSLP(prg: ProfiloPRG, dati: DatiProgetto): EsitoSc
 
   for (const piano of dati.piani) {
     for (const d of DESTINAZIONI) {
-      slpLordaTot += piano.slpLorda[d] ?? 0;
+      slpLordaTot += Math.max(0, piano.slpLorda[d] ?? 0);
     }
-    sommaMurature += piano.scomputi.murature_mq ?? 0;
-    sommaLogge += piano.scomputi.loggePorticati_mq ?? 0;
-    sommaScale += piano.scomputi.vaniScala_mq ?? 0;
-    sommaInterrati += piano.scomputi.interrati_mq ?? 0;
+    sommaMurature += Math.max(0, piano.scomputi.murature_mq ?? 0);
+    sommaLogge += Math.max(0, piano.scomputi.loggePorticati_mq ?? 0);
+    sommaScale += Math.max(0, piano.scomputi.vaniScala_mq ?? 0);
+    sommaInterrati += Math.max(0, piano.scomputi.interrati_mq ?? 0);
   }
 
   const regole = prg.regoleScomputoSLP;
@@ -134,7 +134,7 @@ export function calcolaRigheDestinazione(
   const slpLordaPerDest = emptyRecord();
   for (const piano of dati.piani) {
     for (const d of DESTINAZIONI) {
-      slpLordaPerDest[d] += piano.slpLorda[d] ?? 0;
+      slpLordaPerDest[d] += Math.max(0, piano.slpLorda[d] ?? 0);
     }
   }
 
@@ -271,8 +271,8 @@ export function calcolaParcheggiPrivati(prg: ProfiloPRG, dati: DatiProgetto, vol
   const extraComm = slpNettaCommerciale * (p.dotazioneAggiuntivaCommerciale_percSLP / 100);
   const fabbisognoTotalePrivati = fabbisognoL122 + extraComm;
 
-  const stalli = dati.parcheggiPrivatiProgetto.stalli_mq ?? 0;
-  const manovra = dati.parcheggiPrivatiProgetto.manovra_mq ?? 0;
+  const stalli = Math.max(0, dati.parcheggiPrivatiProgetto.stalli_mq ?? 0);
+  const manovra = Math.max(0, dati.parcheggiPrivatiProgetto.manovra_mq ?? 0);
   const totaleProgettoPrivati = stalli + manovra;
   const percManovraReale = totaleProgettoPrivati > EPSILON ? (manovra / totaleProgettoPrivati) * 100 : 0;
 
@@ -295,12 +295,12 @@ export function calcolaParcheggiPrivati(prg: ProfiloPRG, dati: DatiProgetto, vol
 
 export function calcolaSagomaEDistanze(prg: ProfiloPRG, dati: DatiProgetto): RisultatoSagoma {
   const p = prg.parametriEdificatori;
-  const sf = dati.superficieFondiaria_Sf;
-  const rapportoCopertura = sf > EPSILON ? (dati.superficieCoperta_Sc / sf) * 100 : 0;
+  const sf = Math.max(0, dati.superficieFondiaria_Sf);
+  const rapportoCopertura = sf > EPSILON ? (Math.max(0, dati.superficieCoperta_Sc) / sf) * 100 : 0;
 
   let superficiePonderata = 0;
   for (const sp of dati.superficiPermeabili) {
-    superficiePonderata += sp.area_mq * sp.coefficiente_0_1;
+    superficiePonderata += Math.max(0, sp.area_mq) * Math.min(1, Math.max(0, sp.coefficiente_0_1));
   }
   const indicePermeabilita = sf > EPSILON ? (superficiePonderata / sf) * 100 : 0;
 

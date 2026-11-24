@@ -1,32 +1,23 @@
-# React + TypeScript + Vite
+# Calcoli Urbanistici & Planivolumetrici
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+SPA client-side in React + TypeScript + Vite per il calcolo automatico degli indici urbanistici ed edilizi (SLP, scomputi con tetto logge, volume, mix funzionale, standard D.M. 1444/68 con monetizzazione, parcheggi L. 122/89, copertura, permeabilità, distanze) secondo il RET e le NTA comunali.
 
-Currently, two official plugins are available:
+La specifica completa è in [SPEC_PROGETTO.md](./SPEC_PROGETTO.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Funzioni principali
 
-## React Compiler
+- **Motore di calcolo puro** (`src/engine/motoreUrbanistico.ts`) testato con Vitest (30 test).
+- **Import DXF** (`src/parsers/dxfParser.ts`): polilinee chiuse su layer `URB_*`, aree con formula di Gauss, fattore di scala `m`/`cm`/`mm`.
+- **Estrazione regole NTA con Mistral AI** (`src/parsers/prgAiParser.ts`): l'API key è salvata solo nel `localStorage` del browser.
+- **Quadro sinottico verifiche** con badge CONFORME / NON CONFORME.
+- **Export Excel multi-foglio** (`src/utils/exportExcel.ts`) e **relazione stampabile in PDF** (`@media print`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Comandi
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev      # sviluppo
+npm test         # test unitari (vitest run)
+npm run lint     # oxlint
+npm run build    # tsc -b + vite build
 ```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.

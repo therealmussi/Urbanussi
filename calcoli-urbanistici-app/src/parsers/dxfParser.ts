@@ -1,6 +1,6 @@
 import DxfParser from 'dxf-parser';
 import type { DatiProgetto, DestinazioneUso, Piano, SuperficiePermeabile } from '../types/urbanistica';
-import { datiProgettoDefault } from '../data/prgDefault';
+import { creaDatiProgettoVuoto } from '../data/prgDefault';
 
 export type UnitaDisegno = 'm' | 'cm' | 'mm';
 
@@ -129,7 +129,7 @@ export function parseDxf(contenuto: string, unita: UnitaDisegno = 'm', datiBase?
 
   const dati: DatiProgetto = datiBase
     ? (JSON.parse(JSON.stringify(datiBase)) as DatiProgetto)
-    : (JSON.parse(JSON.stringify(datiProgettoDefault)) as DatiProgetto);
+    : creaDatiProgettoVuoto();
 
   const fattore = FATTORI_SCALA[unita];
   const logLayer: LayerLog[] = [];
