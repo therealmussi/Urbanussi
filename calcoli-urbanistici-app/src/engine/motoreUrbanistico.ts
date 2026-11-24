@@ -418,18 +418,21 @@ export function calcolaTutto(prg: ProfiloPRG, dati: DatiProgetto): RisultatoCalc
 
   const dettagliMix: Verifica[] = righeDestinazioni
     .filter((r) => r.slpNetta > EPSILON)
-    .map((r) => ({
-      etichetta: `Mix funzionale - ${LABEL_DESTINAZIONI[r.destinazione]}`,
-      richiesto: r.quotaMax_perc,
-      previsto: r.quotaPerc,
-      unitaMisura: '%',
-      conforme: r.conformeMix,
-      dettaglio: r.conformeMix
-        ? `Quota ${round(r.quotaPerc)}% (consentita ${r.quotaMin_perc}–${r.quotaMax_perc}%)`
-        : r.ammessa
-          ? `Quota ${round(r.quotaPerc)}% fuori dal range ${r.quotaMin_perc}–${r.quotaMax_perc}%`
-          : `Destinazione non ammessa in zona ${prg.zona}`,
-    }));
+    .map((r) => {
+      const regola = prg.destinazioni[r.destinazione];
+      return {
+        etichetta: `Mix funzionale - ${LABEL_DESTINAZIONI[r.destinazione]}`,
+        richiesto: regola.quotaMax_perc,
+        previsto: r.quotaPerc,
+        unitaMisura: '%',
+        conforme: r.conformeMix,
+        dettaglio: r.conformeMix
+          ? `Quota ${round(r.quotaPerc)}% (consentita ${regola.quotaMin_perc}–${regola.quotaMax_perc}%)`
+          : r.ammessa
+            ? `Quota ${round(r.quotaPerc)}% fuori dal range ${regola.quotaMin_perc}–${regola.quotaMax_perc}%`
+            : `Destinazione non ammessa in zona ${prg.zona}`,
+      };
+    });
   const mixFunzionaleConforme = dettagliMix.every((v) => v.conforme) || dettagliMix.length === 0;
 
   const standard = calcolaStandard(prg, righeDestinazioni, dati);
