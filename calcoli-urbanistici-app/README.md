@@ -1,0 +1,23 @@
+# Calcoli Urbanistici & Planivolumetrici
+
+SPA client-side in React + TypeScript + Vite per il calcolo automatico degli indici urbanistici ed edilizi (SLP, scomputi con tetto logge, volume, mix funzionale, standard D.M. 1444/68 con monetizzazione, parcheggi L. 122/89, copertura, permeabilità, distanze) secondo il RET e le NTA comunali.
+
+La specifica completa è in [SPEC_PROGETTO.md](./SPEC_PROGETTO.md).
+
+## Funzioni principali
+
+- **Motore di calcolo puro** (`src/engine/motoreUrbanistico.ts`) testato con Vitest (30 test).
+- **Import DXF** (`src/parsers/dxfParser.ts`): polilinee chiuse su layer `URB_*`, aree con formula di Gauss, fattore di scala `m`/`cm`/`mm`.
+- **Estrazione regole NTA con Mistral AI** (`src/parsers/prgAiParser.ts`): l'API key è salvata solo nel `localStorage` del browser.
+- **Quadro sinottico verifiche** con badge CONFORME / NON CONFORME.
+- **Export Excel multi-foglio** (`src/utils/exportExcel.ts`) e **relazione stampabile in PDF** (`@media print`).
+
+## Comandi
+
+```bash
+npm install
+npm run dev      # sviluppo
+npm test         # test unitari (vitest run)
+npm run lint     # oxlint
+npm run build    # tsc -b + vite build
+```
