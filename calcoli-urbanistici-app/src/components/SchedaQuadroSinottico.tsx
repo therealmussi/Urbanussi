@@ -1,6 +1,7 @@
 import type { DatiProgetto, ProfiloPRG, RisultatoCalcolo } from '../types/urbanistica';
 import { LABEL_DESTINAZIONI } from '../types/urbanistica';
 import { Badge, Card, ProgressBar } from './common';
+import { GraficoMix } from './GraficoMix';
 
 interface Props {
   prg: ProfiloPRG;
@@ -85,6 +86,7 @@ export function SchedaQuadroSinottico({ prg, dati, esito }: Props) {
       </Card>
 
       <Card titolo="SLP Lorda → Scomputi → SLP Netta per destinazione e mix funzionale" extra={<Badge conforme={esito.mixFunzionaleConforme} />}>
+        <GraficoMix righe={esito.righeDestinazioni} />
         <div className="tabella-scroll">
           <table className="tabella">
             <thead>
