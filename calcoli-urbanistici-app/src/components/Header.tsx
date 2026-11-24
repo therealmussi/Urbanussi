@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import { FolderOpen, History, RotateCcw, Save } from 'lucide-react';
 import type { StatoSemafori } from '../types/urbanistica';
 import type { UnitaDisegno } from '../parsers/dxfParser';
 import { TAB, type IndiceTab } from '../tabs';
@@ -11,6 +13,10 @@ interface HeaderProps {
   tab: IndiceTab;
   onChangeTab: (t: IndiceTab) => void;
   stato: StatoSemafori;
+  salvatoIl: string;
+  onSalva: () => void;
+  onCarica: (file: File) => void;
+  onReset: () => void;
 }
 
 function Semaforo({ etichetta, conforme }: { etichetta: string; conforme: boolean }) {
@@ -22,7 +28,9 @@ function Semaforo({ etichetta, conforme }: { etichetta: string; conforme: boolea
   );
 }
 
-export function Header({ prgComune, prgZona, nomeProgetto, unita, onChangeUnita, tab, onChangeTab, stato }: HeaderProps) {
+export function Header({ prgComune, prgZona, nomeProgetto, unita, onChangeUnita, tab, onChangeTab, stato, salvatoIl, onSalva, onCarica, onReset }: HeaderProps) {
+  const fileRef = useRef<HTMLInputElement>(null);
+
   return (
     <header className="app-header">
       <div className="header-principale">
@@ -32,14 +40,37 @@ export function Header({ prgComune, prgZona, nomeProgetto, unita, onChangeUnita,
             {prgComune} — {prgZona} · <strong>{nomeProgetto}</strong> · Unità disegno: {unita}
           </p>
         </div>
-        <label className="header-unita">
-          Unità file DXF
-          <select value={unita} onChange={(e) => onChangeUnita(e.target.value as UnitaDisegno)}>
-            <option value="m">metri (m)</option>
-            <option value="cm">centimetri (cm)</option>
-            <option value="mm">millimetri (mm)</option>
-          </select>
-        </label>
+        <div className="header-azioni">
+          <label className="header-unita">
+            Unità file DXF
+            <select value={unita} onChange={(e) => onChangeUnita(e.target.value as UnitaDisegno)}>
+              <option value="m">metri (m)</option>
+              <option value="cm">centimetri (cm)</option>
+              <option value="mm">millimetri (mm)</option>
+            </select>
+          </label>
+          <button className="btn-icone" title="Esporta progetto completo (.json)" onClick={onSalva}>
+            <Save size={15} />
+          </button>
+          <button className="btn-icone" title="Carica progetto salvato (.json)" onClick={() => fileRef.current?.click()}>
+            <FolderOpen size={15} />
+          </button>
+          <button className="btn-icone" title="Ripristina profilo e progetto demo" onClick={onReset}>
+            <RotateCcw size={15} />
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".json"
+            hidden
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) onCarica(f); e.target.value = ''; }}
+          />
+          {salvatoIl && (
+            <span className="pill salvataggio" title="Salvataggio automatico nel browser">
+              <History size={12} /> {new Date(salvatoIl).toLocaleTimeString('it-IT')}
+            </span>
+          )}
+        </div>
         <div className="header-semafori" data-stampa>
           <Semaforo etichetta="Conformità Urbanistica" conforme={stato.conformitaUrbanistica} />
           <Semaforo etichetta="Standard D.M. 1444/68" conforme={stato.standard} />
