@@ -1,6 +1,7 @@
 import type { DatiProgetto, ProfiloPRG, RisultatoCalcolo } from '../types/urbanistica';
 import { LABEL_DESTINAZIONI } from '../types/urbanistica';
 import { Badge, Card, ProgressBar } from './common';
+import { fmtNumero } from '../utils/formattazione';
 import { GraficoMix } from './GraficoMix';
 
 interface Props {
@@ -38,33 +39,44 @@ export function SchedaQuadroSinottico({ prg, dati, esito }: Props) {
       <div className="quattro-colonne">
         <StatCard
           titolo="SLP Netta vs Max"
-          testoValore={`${esito.slpNettaTot.toFixed(2)} / ${cap.slpMax !== null ? cap.slpMax.toFixed(2) : '—'} mq`}
+          testoValore={`${fmtNumero(esito.slpNettaTot)} / ${cap.slpMax !== null ? fmtNumero(cap.slpMax) : '—'} mq`}
           valoreEvento={utlizzataSLP}
-          sub={cap.slpResidua !== null ? `Residuo: ${cap.slpResidua.toFixed(2)} mq` : 'Indice non valorizzato'}
+          sub={cap.slpResidua !== null ? `Residuo: ${fmtNumero(cap.slpResidua)} mq` : 'Indice non valorizzato'}
           conforme={cap.slpMax === null ? null : esito.slpNettaTot <= cap.slpMax + 1e-9}
         />
         <StatCard
           titolo="Volume vs Max"
-          testoValore={`${esito.volumeProgetto_mc.toFixed(2)} / ${cap.vMax !== null ? cap.vMax.toFixed(2) : '—'} mc`}
+          testoValore={`${fmtNumero(esito.volumeProgetto_mc)} / ${cap.vMax !== null ? fmtNumero(cap.vMax) : '—'} mc`}
           valoreEvento={utlizzatoVolume}
-          sub={cap.volumeResiduo !== null ? `Residuo: ${cap.volumeResiduo.toFixed(2)} mc` : 'Indice non valorizzato'}
+          sub={cap.volumeResiduo !== null ? `Residuo: ${fmtNumero(cap.volumeResiduo)} mc` : 'Indice non valorizzato'}
           conforme={cap.vMax === null ? null : esito.volumeProgetto_mc <= cap.vMax + 1e-9}
         />
         <StatCard
           titolo="Rapporto di Copertura"
-          testoValore={`${esito.sagoma.rapportoCopertura_perc.toFixed(2)}% / max ${prg.parametriEdificatori.rapportoCoperturaMax_perc}%`}
+          testoValore={`${fmtNumero(esito.sagoma.rapportoCopertura_perc)}% / max ${prg.parametriEdificatori.rapportoCoperturaMax_perc}%`}
           valoreEvento={esito.sagoma.rapportoCopertura_perc}
-          sub={`Sc = ${dati.superficieCoperta_Sc.toFixed(2)} mq su Sf = ${sf.toFixed(2)} mq`}
+          sub={`Sc = ${fmtNumero(dati.superficieCoperta_Sc)} mq su Sf = ${fmtNumero(sf)} mq`}
           conforme={sf <= 0 ? null : esito.sagoma.verifiche[0].conforme}
         />
         <StatCard
           titolo="Permeabilità"
-          testoValore={`${esito.sagoma.indicePermeabilita_perc.toFixed(2)}% / min ${prg.parametriEdificatori.indicePermeabilitaMin_perc}%`}
+          testoValore={`${fmtNumero(esito.sagoma.indicePermeabilita_perc)}% / min ${prg.parametriEdificatori.indicePermeabilitaMin_perc}%`}
           valoreEvento={esito.sagoma.indicePermeabilita_perc}
-          sub={`SP ponderata = ${esito.sagoma.superficiePonderataPermeabile_mq.toFixed(2)} mq`}
+          sub={`SP ponderata = ${fmtNumero(esito.sagoma.superficiePonderataPermeabile_mq)} mq`}
           conforme={sf <= 0 ? null : esito.sagoma.verifiche[1].conforme}
         />
       </div>
+
+      {esito.avvisiCoerenza.length > 0 && (
+        <div className="avvisi-coerenza">
+          <strong>Controlli di coerenza sugli input</strong>
+          <ul>
+            {esito.avvisiCoerenza.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <Card titolo="Conformità urbanistica e planivolumetrica" extra={<Badge conforme={esito.conformeEdificabilita} />}>
         <div className="tabella-scroll">
@@ -105,21 +117,21 @@ export function SchedaQuadroSinottico({ prg, dati, esito }: Props) {
               {esito.righeDestinazioni.map((r) => (
                 <tr key={r.destinazione} className={r.slpNetta > 0 && !r.conformeMix ? 'riga-ko' : ''}>
                   <td className="etichetta">{LABEL_DESTINAZIONI[r.destinazione]}</td>
-                  <td className="mono">{r.slpLorda.toFixed(2)}</td>
-                  <td className="mono">{r.scomputiProporzionali.toFixed(2)}</td>
-                  <td className="mono">{r.loggeEccedentiTassate.toFixed(2)}</td>
-                  <td className="mono forte">{r.slpNetta.toFixed(2)}</td>
-                  <td className="mono">{r.quotaPerc.toFixed(2)}</td>
+                  <td className="mono">{fmtNumero(r.slpLorda)}</td>
+                  <td className="mono">{fmtNumero(r.scomputiProporzionali)}</td>
+                  <td className="mono">{fmtNumero(r.loggeEccedentiTassate)}</td>
+                  <td className="mono forte">{fmtNumero(r.slpNetta)}</td>
+                  <td className="mono">{fmtNumero(r.quotaPerc)}</td>
                   <td>{r.ammessa ? 'Sì' : 'No'}</td>
                   <td>{r.slpNetta > 0 ? <Badge conforme={r.conformeMix} /> : '—'}</td>
                 </tr>
               ))}
               <tr className="riga-totale">
                 <td className="etichetta">TOTALE</td>
-                <td className="mono">{esito.slpLordaTot.toFixed(2)}</td>
-                <td className="mono">{(esito.scompMuri + esito.scompScale + esito.scompInterrati + esito.scompLoggeAmmesso).toFixed(2)}</td>
-                <td className="mono">{esito.loggeEccedentiTassate.toFixed(2)}</td>
-                <td className="mono forte">{esito.slpNettaTot.toFixed(2)}</td>
+                <td className="mono">{fmtNumero(esito.slpLordaTot)}</td>
+                <td className="mono">{fmtNumero((esito.scompMuri + esito.scompScale + esito.scompInterrati + esito.scompLoggeAmmesso))}</td>
+                <td className="mono">{fmtNumero(esito.loggeEccedentiTassate)}</td>
+                <td className="mono forte">{fmtNumero(esito.slpNettaTot)}</td>
                 <td className="mono">100.00</td>
                 <td />
                 <td><Badge conforme={esito.mixFunzionaleConforme} /></td>
@@ -128,9 +140,9 @@ export function SchedaQuadroSinottico({ prg, dati, esito }: Props) {
           </table>
         </div>
         <p className="nota">
-          Scomputi applicati: murature {esito.scompMuri.toFixed(2)} mq, vani scala {esito.scompScale.toFixed(2)} mq, interrati {esito.scompInterrati.toFixed(2)} mq,
-          logge ammesse {esito.scompLoggeAmmesso.toFixed(2)} mq su tetto di {esito.tettoLoggeMq.toFixed(2)} mq ({prg.regoleScomputoSLP.tettoMaxLoggePorticati_percSLP}% della SLP lorda).
-          Volume progetto = SLP netta × {prg.parametriEdificatori.altezzaVirtualeConversione_m.toFixed(2)} m = {esito.volumeProgetto_mc.toFixed(2)} mc.
+          Scomputi applicati: murature {fmtNumero(esito.scompMuri)} mq, vani scala {fmtNumero(esito.scompScale)} mq, interrati {fmtNumero(esito.scompInterrati)} mq,
+          logge ammesse {fmtNumero(esito.scompLoggeAmmesso)} mq su tetto di {fmtNumero(esito.tettoLoggeMq)} mq ({prg.regoleScomputoSLP.tettoMaxLoggePorticati_percSLP}% della SLP lorda).
+          Volume progetto = SLP netta × {fmtNumero(prg.parametriEdificatori.altezzaVirtualeConversione_m)} m = {fmtNumero(esito.volumeProgetto_mc)} mc.
         </p>
       </Card>
 
@@ -152,12 +164,12 @@ export function SchedaQuadroSinottico({ prg, dati, esito }: Props) {
               {esito.standard.righe.map((r) => (
                 <tr key={r.destinazione}>
                   <td className="etichetta">{LABEL_DESTINAZIONI[r.destinazione]}</td>
-                  <td className="mono">{r.abitantiTeorici.toFixed(2)}</td>
-                  <td className="mono">{r.fabbisognoTotale_mq.toFixed(2)}</td>
-                  <td className="mono">{r.fabbisognoParcheggiPubblici_mq.toFixed(2)}</td>
-                  <td className="mono">{r.fabbisognoVerdeServizi_mq.toFixed(2)}</td>
+                  <td className="mono">{fmtNumero(r.abitantiTeorici)}</td>
+                  <td className="mono">{fmtNumero(r.fabbisognoTotale_mq)}</td>
+                  <td className="mono">{fmtNumero(r.fabbisognoParcheggiPubblici_mq)}</td>
+                  <td className="mono">{fmtNumero(r.fabbisognoVerdeServizi_mq)}</td>
                   <td>{r.monetizzazioneAmmessa ? 'Ammessa' : 'Non ammessa'}</td>
-                  <td className="mono">{r.tariffa_euroMq.toFixed(2)}</td>
+                  <td className="mono">{fmtNumero(r.tariffa_euroMq)}</td>
                 </tr>
               ))}
             </tbody>
@@ -171,7 +183,7 @@ export function SchedaQuadroSinottico({ prg, dati, esito }: Props) {
           <div className="mini-quadro">
             <h4>Monetizzazione</h4>
             <p>
-              Importo totale: <strong className="mono">{esito.standard.importoMonetizzazioneTot.toFixed(2)} €</strong>
+              Importo totale: <strong className="mono">{fmtNumero(esito.standard.importoMonetizzazioneTot)} €</strong>
             </p>
             <p className="nota">
               Calcolo sui deficit di parcheggi pubblici e verde/servizi con la tariffa della destinazione che genera lo standard
@@ -186,8 +198,8 @@ export function SchedaQuadroSinottico({ prg, dati, esito }: Props) {
               {esito.standard.dettagli.map((v, i) => (
                 <tr key={i} className={v.conforme ? '' : 'riga-ko'}>
                   <td>{v.etichetta}</td>
-                  <td className="mono">{v.richiesto.toFixed(2)} {v.unitaMisura}</td>
-                  <td className="mono">{v.previsto.toFixed(2)} {v.unitaMisura}</td>
+                  <td className="mono">{fmtNumero(v.richiesto)} {v.unitaMisura}</td>
+                  <td className="mono">{fmtNumero(v.previsto)} {v.unitaMisura}</td>
                   <td><Badge conforme={v.conforme} /></td>
                   <td>{v.dettaglio}</td>
                 </tr>
@@ -202,13 +214,13 @@ export function SchedaQuadroSinottico({ prg, dati, esito }: Props) {
           <div className="tabella-scroll">
             <table className="tabella mini">
               <tbody>
-                <tr><td>Volume urbanistico di progetto</td><td className="mono">{esito.parcheggi.volumeProgetto_mc.toFixed(2)} mc</td></tr>
-                <tr><td>Fabbisogno L. 122/89 ({prg.parcheggiPrivati.rapportoLegge122_89_mqOgniMc} mq/mc)</td><td className="mono">{esito.parcheggi.fabbisognoL122_mq.toFixed(2)} mq</td></tr>
-                <tr><td>Dotazione aggiuntiva commerciale</td><td className="mono">{esito.parcheggi.extraCommerciale_mq.toFixed(2)} mq</td></tr>
-                <tr className="riga-totale"><td>Fabbisogno totale</td><td className="mono">{esito.parcheggi.fabbisognoTotalePrivati_mq.toFixed(2)} mq</td></tr>
-                <tr><td>Stalli previsti</td><td className="mono">{esito.parcheggi.stalliProgetto_mq.toFixed(2)} mq</td></tr>
-                <tr><td>Corsie manovra</td><td className="mono">{esito.parcheggi.manovraProgetto_mq.toFixed(2)} mq</td></tr>
-                <tr><td>% manovra (max {esito.parcheggi.percManovraMax}%)</td><td className="mono">{esito.parcheggi.percManovraReale.toFixed(2)}%</td></tr>
+                <tr><td>Volume urbanistico di progetto</td><td className="mono">{fmtNumero(esito.parcheggi.volumeProgetto_mc)} mc</td></tr>
+                <tr><td>Fabbisogno L. 122/89 ({prg.parcheggiPrivati.rapportoLegge122_89_mqOgniMc} mq/mc)</td><td className="mono">{fmtNumero(esito.parcheggi.fabbisognoL122_mq)} mq</td></tr>
+                <tr><td>Dotazione aggiuntiva commerciale</td><td className="mono">{fmtNumero(esito.parcheggi.extraCommerciale_mq)} mq</td></tr>
+                <tr className="riga-totale"><td>Fabbisogno totale</td><td className="mono">{fmtNumero(esito.parcheggi.fabbisognoTotalePrivati_mq)} mq</td></tr>
+                <tr><td>Stalli previsti</td><td className="mono">{fmtNumero(esito.parcheggi.stalliProgetto_mq)} mq</td></tr>
+                <tr><td>Corsie manovra</td><td className="mono">{fmtNumero(esito.parcheggi.manovraProgetto_mq)} mq</td></tr>
+                <tr><td>% manovra (max {esito.parcheggi.percManovraMax}%)</td><td className="mono">{fmtNumero(esito.parcheggi.percManovraReale)}%</td></tr>
               </tbody>
             </table>
           </div>
@@ -242,13 +254,13 @@ function RigheStandard({ esito }: { esito: RisultatoCalcolo }) {
     <div className="tabella-scroll">
       <table className="tabella mini">
         <tbody>
-          <tr><td>Abitanti teorici totali</td><td className="mono">{s.abitantiTeoriciTot.toFixed(2)}</td></tr>
-          <tr><td>Fabbisogno parcheggi pubblici</td><td className="mono">{s.fabbisognoParkPubbliciTot.toFixed(2)} mq</td></tr>
-          <tr><td>Fabbisogno verde/servizi</td><td className="mono">{s.fabbisognoVerdeServiziTot.toFixed(2)} mq</td></tr>
-          <tr><td>Ceduto parcheggi pubblici</td><td className="mono">{s.cedutoParkPubblici_mq.toFixed(2)} mq</td></tr>
-          <tr><td>Ceduto verde + servizi</td><td className="mono">{s.cedutoVerdeServizi_mq.toFixed(2)} mq</td></tr>
-          <tr><td>Deficit parcheggi pubblici</td><td className="mono">{s.deficitParkPubblici.toFixed(2)} mq</td></tr>
-          <tr><td>Deficit verde/servizi</td><td className="mono">{s.deficitVerdeServizi.toFixed(2)} mq</td></tr>
+          <tr><td>Abitanti teorici totali</td><td className="mono">{fmtNumero(s.abitantiTeoriciTot)}</td></tr>
+          <tr><td>Fabbisogno parcheggi pubblici</td><td className="mono">{fmtNumero(s.fabbisognoParkPubbliciTot)} mq</td></tr>
+          <tr><td>Fabbisogno verde/servizi</td><td className="mono">{fmtNumero(s.fabbisognoVerdeServiziTot)} mq</td></tr>
+          <tr><td>Ceduto parcheggi pubblici</td><td className="mono">{fmtNumero(s.cedutoParkPubblici_mq)} mq</td></tr>
+          <tr><td>Ceduto verde + servizi</td><td className="mono">{fmtNumero(s.cedutoVerdeServizi_mq)} mq</td></tr>
+          <tr><td>Deficit parcheggi pubblici</td><td className="mono">{fmtNumero(s.deficitParkPubblici)} mq</td></tr>
+          <tr><td>Deficit verde/servizi</td><td className="mono">{fmtNumero(s.deficitVerdeServizi)} mq</td></tr>
         </tbody>
       </table>
     </div>

@@ -6,11 +6,15 @@ La specifica completa è in [SPEC_PROGETTO.md](./SPEC_PROGETTO.md).
 
 ## Funzioni principali
 
-- **Motore di calcolo puro** (`src/engine/motoreUrbanistico.ts`) testato con Vitest (30 test).
+- **Motore di calcolo puro** (`src/engine/motoreUrbanistico.ts`) testato con Vitest (33 test).
 - **Import DXF** (`src/parsers/dxfParser.ts`): polilinee chiuse su layer `URB_*`, aree con formula di Gauss, fattore di scala `m`/`cm`/`mm`.
 - **Estrazione regole NTA con Mistral AI** (`src/parsers/prgAiParser.ts`): l'API key è salvata solo nel `localStorage` del browser.
 - **Quadro sinottico verifiche** con badge CONFORME / NON CONFORME e grafico del mix funzionale.
-- **Salvataggio automatico nel browser** (localStorage) del profilo e del progetto, con export/import `.json` completo e reset al progetto demo.
+- **Gestione multi-progetto**: biblioteca dei progetti salvata nel browser, con selettore, creazione, duplicazione ed eliminazione; ogni progetto mantiene profilo PRG e dati geometrie; export/import `.json` completo e reset al progetto demo.
+- **Salvataggio automatico** a ogni modifica con indicazione dell'ora dell'ultimo salvataggio.
+- **Toast di notifica** al posto degli alert bloccanti per export, import ed eliminazioni.
+- **Controlli di coerenza sugli input** (piani vuoti, Sc > Sf, Sf > St, aree permeabili o parcheggi assenti, altezza/distanze non inserite) visualizzati nel quadro sinottico.
+- **Numeri in formato italiano** (separatore migliaia e virgola decimale) in tutta l'interfaccia e nella relazione stampabile.
 - **Export Excel multi-foglio** (`src/utils/exportExcel.ts`) e **relazione stampabile in PDF** (`@media print`).
 
 ## Comandi

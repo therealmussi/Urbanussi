@@ -1,7 +1,8 @@
 import { useRef } from 'react';
-import { FolderOpen, History, RotateCcw, Save } from 'lucide-react';
+import { Copy, FolderOpen, History, Plus, RotateCcw, Save, Trash2 } from 'lucide-react';
 import type { StatoSemafori } from '../types/urbanistica';
 import type { UnitaDisegno } from '../parsers/dxfParser';
+import type { ProgettoSalvato } from '../utils/persistenza';
 import { TAB, type IndiceTab } from '../tabs';
 
 interface HeaderProps {
@@ -17,6 +18,12 @@ interface HeaderProps {
   onSalva: () => void;
   onCarica: (file: File) => void;
   onReset: () => void;
+  progetti: ProgettoSalvato[];
+  attivoId: string | null;
+  onSelectProgetto: (id: string) => void;
+  onNuovoProgetto: () => void;
+  onDuplicaProgetto?: () => void;
+  onEliminaProgetto?: () => void;
 }
 
 function Semaforo({ etichetta, conforme }: { etichetta: string; conforme: boolean }) {
@@ -28,7 +35,7 @@ function Semaforo({ etichetta, conforme }: { etichetta: string; conforme: boolea
   );
 }
 
-export function Header({ prgComune, prgZona, nomeProgetto, unita, onChangeUnita, tab, onChangeTab, stato, salvatoIl, onSalva, onCarica, onReset }: HeaderProps) {
+export function Header({ prgComune, prgZona, nomeProgetto, unita, onChangeUnita, tab, onChangeTab, stato, salvatoIl, onSalva, onCarica, onReset, progetti, attivoId, onSelectProgetto, onNuovoProgetto, onDuplicaProgetto, onEliminaProgetto }: HeaderProps) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -41,6 +48,32 @@ export function Header({ prgComune, prgZona, nomeProgetto, unita, onChangeUnita,
           </p>
         </div>
         <div className="header-azioni">
+          <div className="header-progetto">
+            <select
+              aria-label="Progetto attivo"
+              className="header-progetto-select"
+              value={attivoId ?? ''}
+              onChange={(e) => onSelectProgetto(e.target.value)}
+            >
+              {progetti.length === 0 && <option value="">(non salvato)</option>}
+              {progetti.map((p) => (
+                <option key={p.id} value={p.id}>{p.dati.nomeProgetto}</option>
+              ))}
+            </select>
+            <button className="btn-icone" title="Nuovo progetto" onClick={onNuovoProgetto}>
+              <Plus size={15} />
+            </button>
+            {onDuplicaProgetto && (
+              <button className="btn-icone" title="Duplica progetto attivo" onClick={onDuplicaProgetto}>
+                <Copy size={15} />
+              </button>
+            )}
+            {onEliminaProgetto && (
+              <button className="btn-icone btn-pericolo" title="Elimina progetto attivo" onClick={onEliminaProgetto}>
+                <Trash2 size={15} />
+              </button>
+            )}
+          </div>
           <label className="header-unita">
             Unità file DXF
             <select value={unita} onChange={(e) => onChangeUnita(e.target.value as UnitaDisegno)}>

@@ -1,44 +1,88 @@
 import type { DatiProgetto, ProfiloPRG } from '../types/urbanistica';
 
-const CHIAVE_STATO = 'calcoli-urbanistici-stato-v1';
+const CHIAVE = 'calcoli-urbanistici-biblioteca-v2';
+const CHIAVE_LEGACY = 'calcoli-urbanistici-stato-v1';
 
-export interface StatoSalvato {
-  versione: 1;
-  salvatoIl: string;
+export interface ProgettoSalvato {
+  id: string;
+  aggiornatoIl: string;
   prg: ProfiloPRG;
   dati: DatiProgetto;
 }
 
-export function leggiStato(): StatoSalvato | null {
+export interface Biblioteca {
+  versione: 2;
+  attivoId: string | null;
+  progetti: ProgettoSalvato[];
+}
+
+export interface Toast {
+  messaggio: string;
+  tipo: 'ok' | 'ko';
+}
+
+export function leggiBiblioteca(): Biblioteca {
   try {
-    const raw = localStorage.getItem(CHIAVE_STATO);
-    if (!raw) return null;
-    const st = JSON.parse(raw) as StatoSalvato;
-    if (st?.versione !== 1 || !st.prg?.parametriEdificatori || !Array.isArray(st.dati?.piani)) {
-      return null;
+    const raw = localStorage.getItem(CHIAVE);
+    if (raw) {
+      const b = JSON.parse(raw) as Biblioteca;
+      if (b?.versione === 2 && Array.isArray(b.progetti)) {
+        return { ...b, progetti: b.progetti.filter((p) => p?.prg?.parametriEdificatori && Array.isArray(p.dati?.piani)) };
+      }
     }
-    return st;
   } catch {
-    return null;
+    window.alert("Dati salvati nel browser illeggibili: verranno ricreati.");
+  }
+  try {
+    const rawLegacy = localStorage.getItem(CHIAVE_LEGACY);
+    if (rawLegacy) {
+      const st = JSON.parse(rawLegacy) as { prg?: ProfiloPRG; dati?: DatiProgetto; salvatoIl?: string };
+      if (st?.prg?.parametriEdificatori && Array.isArray(st.dati?.piani)) {
+        const bib: Biblioteca = {
+          versione: 2,
+          attivoId: 'prj-legacy',
+          progetti: [{ id: 'prj-legacy', aggiornatoIl: st.salvatoIl ?? new Date().toISOString(), prg: st.prg, dati: st.dati }],
+        };
+        localStorage.setItem(CHIAVE, JSON.stringify(bib));
+        localStorage.removeItem(CHIAVE_LEGACY);
+        return bib;
+      }
+    }
+  } catch {
+    return { versione: 2, attivoId: null, progetti: [] };
+  }
+  return { versione: 2, attivoId: null, progetti: [] };
+}
+
+export function salvaBiblioteca(b: Biblioteca): void {
+  try {
+    localStorage.setItem(CHIAVE, JSON.stringify(b));
+  } catch {
+    window.alert('Impossibile salvare nel browser (spazio esaurito o navigazione privata).');
   }
 }
 
-export function salvaStato(prg: ProfiloPRG, dati: DatiProgetto): string {
-  try {
-    const st: StatoSalvato = { versione: 1, salvatoIl: new Date().toISOString(), prg, dati };
-    localStorage.setItem(CHIAVE_STATO, JSON.stringify(st));
-    return st.salvatoIl;
-  } catch {
-    return '';
-  }
+export function salvaProgetto(b: Biblioteca, id: string, prg: ProfiloPRG, dati: DatiProgetto): Biblioteca {
+  const aggiornatoIl = new Date().toISOString();
+  const esistente = b.progetti.some((p) => p.id === id);
+  const progetti = esistente
+    ? b.progetti.map((p) => (p.id === id ? { ...p, prg, dati, aggiornatoIl } : p))
+    : [...b.progetti, { id, prg, dati, aggiornatoIl }];
+  const nuova: Biblioteca = { versione: 2, attivoId: id, progetti };
+  salvaBiblioteca(nuova);
+  return nuova;
 }
 
-export function azzeraStato(): void {
-  try {
-    localStorage.removeItem(CHIAVE_STATO);
-  } catch {
-    window.alert('Impossibile cancellare i dati salvati nel browser.');
-  }
+export function eliminaProgetto(b: Biblioteca, id: string): Biblioteca {
+  const progetti = b.progetti.filter((p) => p.id !== id);
+  const attivoId = b.attivoId === id ? null : b.attivoId;
+  const nuova: Biblioteca = { versione: 2, attivoId, progetti };
+  salvaBiblioteca(nuova);
+  return nuova;
+}
+
+export function nuovoId(): string {
+  return `prj-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
 function scaricaJson(nome: string, contenuto: string): void {
@@ -52,17 +96,15 @@ function scaricaJson(nome: string, contenuto: string): void {
 }
 
 export function esportaProgettoCompleto(prg: ProfiloPRG, dati: DatiProgetto): string {
-  const nome = `Progetto_Urbanistico_${dati.nomeProgetto.replace(/[^a-zA-Z0-9]+/g, '_')}.json`;
-  const st: StatoSalvato = { versione: 1, salvatoIl: new Date().toISOString(), prg, dati };
-  scaricaJson(nome, JSON.stringify(st, null, 2));
+  const nome = `Progetto_Urbanistico_${dati.nomeProgetto.replace(/[^a-zA-Z0-9]+/gu, '_')}.json`;
+  scaricaJson(nome, JSON.stringify({ versione: 1, salvatoIl: new Date().toISOString(), prg, dati }, null, 2));
   return nome;
 }
 
-export async function importaProgettoCompleto(file: File): Promise<StatoSalvato> {
-  const st = JSON.parse(await file.text()) as StatoSalvato;
-  if (st?.versione !== 1 || !st.prg?.parametriEdificatori || !st.prg.destinazioni || !Array.isArray(st.dati?.piani)) {
-    throw new Error('File progetto non valido: serve un JSON esportato dall\'app');
+export async function importaProgettoCompleto(file: File): Promise<{ prg: ProfiloPRG; dati: DatiProgetto }> {
+  const st = JSON.parse(await file.text()) as { versione?: number; prg?: ProfiloPRG; dati?: DatiProgetto };
+  if (!st?.prg?.parametriEdificatori || !st.prg.destinazioni || !Array.isArray(st.dati?.piani)) {
+    throw new Error('File non riconosciuto: serve un JSON esportato dall\'app');
   }
-  salvaStato(st.prg, st.dati);
-  return st;
+  return { prg: st.prg, dati: st.dati };
 }
