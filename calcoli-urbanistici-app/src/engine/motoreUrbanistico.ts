@@ -19,6 +19,25 @@ export function isValorizzato(v: number | null | undefined): boolean {
   return v !== null && v !== undefined && Number.isFinite(v);
 }
 
+/** Controlli di coerenza sugli input geometrici, prima dei calcoli di merito. */
+export function controlliCoerenza(dati: DatiProgetto): string[] {
+  const avvisi: string[] = [];
+  if (dati.piani.length === 0) avvisi.push('Nessun piano inserito: verifiche di edificabilità non significative');
+  if (dati.superficieCoperta_Sc > dati.superficieFondiaria_Sf) avvisi.push('La superficie coperta supera la superficie fondiaria: verificare gli input');
+  if (dati.superficieFondiaria_Sf > 0 && dati.superficieTerritoriale_St > 0 && dati.superficieFondiaria_Sf > dati.superficieTerritoriale_St) {
+    avvisi.push('La superficie fondiaria supera la superficie territoriale: verificare gli input del lotto');
+  }
+  if (dati.superficiPermeabili.length === 0) avvisi.push('Nessuna area permeabile inserita: la verifica di permeabilità risulterà non conforme');
+  if (dati.sagomaEDistanze.altezzaProgetto_m === 0) avvisi.push('Altezza del progetto non inserita (0 m)');
+  if (dati.sagomaEDistanze.distanzaConfini_m === 0 || dati.sagomaEDistanze.distanzaFabbricati_m === 0 || dati.sagomaEDistanze.distanzaStrade_m === 0) {
+    avvisi.push('Almeno una distanza non è stata inserita (0 m)');
+  }
+  if (dati.parcheggiPrivatiProgetto.stalli_mq + dati.parcheggiPrivatiProgetto.manovra_mq === 0) {
+    avvisi.push('Nessun parcheggio privato previsto: la verifica L. 122/89 risulterà non conforme');
+  }
+  return avvisi;
+}
+
 export function round(v: number, decimals = 2): number {
   const f = Math.pow(10, decimals);
   return Math.round((v + Number.EPSILON) * f) / f;
@@ -458,6 +477,7 @@ export function calcolaTutto(prg: ProfiloPRG, dati: DatiProgetto): RisultatoCalc
     standard,
     parcheggi,
     sagoma,
+    avvisiCoerenza: controlliCoerenza(dati),
     conformeGlobale:
       conformeEdificabilita
       && mixFunzionaleConforme

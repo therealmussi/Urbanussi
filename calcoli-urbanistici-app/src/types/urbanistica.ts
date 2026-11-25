@@ -216,6 +216,7 @@ export interface RisultatoCalcolo {
   standard: RisultatoStandard;
   parcheggi: RisultatoParcheggi;
   sagoma: RisultatoSagoma;
+  avvisiCoerenza: string[];
   conformeGlobale: boolean;
 }
 
