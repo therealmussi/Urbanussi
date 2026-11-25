@@ -9,6 +9,7 @@ import {
   calcolaSagomaEDistanze,
   calcolaStandard,
   calcolaTutto,
+  controlliCoerenza,
   round,
 } from './motoreUrbanistico';
 
@@ -285,6 +286,32 @@ describe('calcolaTutto', () => {
     const esito = calcolaTutto(profiloPRGDefault, dati);
     expect(esito.conformeGlobale).toBe(false);
     expect(esito.dettagliEdificabilita.every((v) => v.conforme)).toBe(false);
+  });
+});
+
+describe('controlliCoerenza', () => {
+  it('non segnala nulla sul progetto demo completo', () => {
+    expect(controlliCoerenza(cloneD(datiProgettoDefault))).toEqual([]);
+  });
+
+  it('segnala input incoerenti o mancanti', () => {
+    const dati = cloneD(datiProgettoDefault);
+    dati.piani = [];
+    dati.superficieCoperta_Sc = 3000;
+    dati.sagomaEDistanze.altezzaProgetto_m = 0;
+    const avvisi = controlliCoerenza(dati);
+    expect(avvisi.some((a) => a.includes('coperta supera'))).toBe(true);
+    expect(avvisi.some((a) => a.includes('Nessun piano'))).toBe(true);
+    expect(avvisi.some((a) => a.includes('Altezza'))).toBe(true);
+  });
+
+  it('il risultato di calcolaTutto include gli avvisi', () => {
+    const esito = calcolaTutto(profiloPRGDefault, cloneD(datiProgettoDefault));
+    expect(esito.avvisiCoerenza).toMatchObject([]);
+    const vuoto = cloneD(datiProgettoDefault);
+    vuoto.piani = [];
+    vuoto.parcheggiPrivatiProgetto = { stalli_mq: 0, manovra_mq: 0 };
+    expect(calcolaTutto(profiloPRGDefault, vuoto).avvisiCoerenza.length).toBeGreaterThan(0);
   });
 });
 

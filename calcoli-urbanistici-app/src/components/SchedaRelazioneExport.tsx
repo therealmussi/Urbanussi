@@ -1,27 +1,29 @@
 import { Download, Printer } from 'lucide-react';
 import type { DatiProgetto, ProfiloPRG, RisultatoCalcolo, StatoSemafori } from '../types/urbanistica';
 import { esportaExcel } from '../utils/exportExcel';
+import { fmtNumero } from '../utils/formattazione';
 
 interface Props {
   prg: ProfiloPRG;
   dati: DatiProgetto;
   esito: RisultatoCalcolo;
   stato: StatoSemafori;
+  onMessaggio: (messaggio: string, tipo?: 'ok' | 'ko') => void;
 }
 
 function CampoRelazione({ etichetta, valore }: { etichetta: string; valore: string }) {
   return <p><strong>{etichetta}:</strong> {valore}</p>;
 }
 
-export function SchedaRelazioneExport({ prg, dati, esito, stato }: Props) {
+export function SchedaRelazioneExport({ prg, dati, esito, stato, onMessaggio }: Props) {
   const percorso = (v: boolean) => (v ? 'CONFORME' : 'NON CONFORME');
 
   const esporta = () => {
     try {
       const nome = esportaExcel(prg, dati, esito);
-      window.alert(`Report generato: ${nome}`);
+      onMessaggio(`Report generato: ${nome}`);
     } catch (err) {
-      window.alert(`Errore durante l'export Excel: ${(err as Error).message}`);
+      onMessaggio(`Errore durante l'export Excel: ${(err as Error).message}`, 'ko');
     }
   };
 
@@ -52,33 +54,33 @@ export function SchedaRelazioneExport({ prg, dati, esito, stato }: Props) {
         </div>
 
         <h3>1. Quadro edificatorio</h3>
-        <CampoRelazione etichetta="SLP lorda" valore={`${esito.slpLordaTot.toFixed(2)} mq`} />
-        <CampoRelazione etichetta="Scomputi ammessi" valore={`murature ${esito.scompMuri.toFixed(2)} mq, vani scala ${esito.scompScale.toFixed(2)} mq, interrati ${esito.scompInterrati.toFixed(2)} mq, logge ammesse ${esito.scompLoggeAmmesso.toFixed(2)} mq (tetto ${prg.regoleScomputoSLP.tettoMaxLoggePorticati_percSLP}% = ${esito.tettoLoggeMq.toFixed(2)} mq; eccedenza tassata ${esito.loggeEccedentiTassate.toFixed(2)} mq)`} />
-        <CampoRelazione etichetta="SLP netta" valore={`${esito.slpNettaTot.toFixed(2)} mq — volume ${esito.volumeProgetto_mc.toFixed(2)} mc`} />
+        <CampoRelazione etichetta="SLP lorda" valore={`${fmtNumero(esito.slpLordaTot)} mq`} />
+        <CampoRelazione etichetta="Scomputi ammessi" valore={`murature ${fmtNumero(esito.scompMuri)} mq, vani scala ${fmtNumero(esito.scompScale)} mq, interrati ${fmtNumero(esito.scompInterrati)} mq, logge ammesse ${fmtNumero(esito.scompLoggeAmmesso)} mq (tetto ${prg.regoleScomputoSLP.tettoMaxLoggePorticati_percSLP}% = ${fmtNumero(esito.tettoLoggeMq)} mq; eccedenza tassata ${fmtNumero(esito.loggeEccedentiTassate)} mq)`} />
+        <CampoRelazione etichetta="SLP netta" valore={`${fmtNumero(esito.slpNettaTot)} mq — volume ${fmtNumero(esito.volumeProgetto_mc)} mc`} />
         {esito.capacitaEdificatoria.slpMax !== null && (
-          <CampoRelazione etichetta="Capienza del lotto" valore={`SLP max ${esito.capacitaEdificatoria.slpMax.toFixed(2)} mq, residuo ${esito.capacitaEdificatoria.slpResidua?.toFixed(2)} mq — V max ${esito.capacitaEdificatoria.vMax?.toFixed(2)} mc, residuo ${esito.capacitaEdificatoria.volumeResiduo?.toFixed(2)} mc`} />
+          <CampoRelazione etichetta="Capienza del lotto" valore={`SLP max ${fmtNumero(esito.capacitaEdificatoria.slpMax)} mq, residuo ${fmtNumero(esito.capacitaEdificatoria.slpResidua)} mq — V max ${fmtNumero(esito.capacitaEdificatoria.vMax)} mc, residuo ${fmtNumero(esito.capacitaEdificatoria.volumeResiduo)} mc`} />
         )}
         <ul>
           {esito.righeDestinazioni.filter((r) => r.slpNetta > 0).map((r) => (
-            <li key={r.destinazione}>{r.destinazione}: {r.slpNetta.toFixed(2)} mq netti ({r.quotaPerc.toFixed(2)}%) — {percorso(r.conformeMix)}</li>
+            <li key={r.destinazione}>{r.destinazione}: {fmtNumero(r.slpNetta)} mq netti ({fmtNumero(r.quotaPerc)}%) — {percorso(r.conformeMix)}</li>
           ))}
         </ul>
 
         <h3>2. Standard urbanistici D.M. 1444/68</h3>
-        <CampoRelazione etichetta="Abitanti teorici" valore={esito.standard.abitantiTeoriciTot.toFixed(2)} />
-        <CampoRelazione etichetta="Fabbisogno parcheggi pubblici" valore={`${esito.standard.fabbisognoParkPubbliciTot.toFixed(2)} mq — ceduti ${esito.standard.cedutoParkPubblici_mq.toFixed(2)} mq — deficit ${esito.standard.deficitParkPubblici.toFixed(2)} mq`} />
-        <CampoRelazione etichetta="Fabbisogno verde/servizi" valore={`${esito.standard.fabbisognoVerdeServiziTot.toFixed(2)} mq — ceduti ${esito.standard.cedutoVerdeServizi_mq.toFixed(2)} mq — deficit ${esito.standard.deficitVerdeServizi.toFixed(2)} mq`} />
-        <CampoRelazione etichetta="Monetizzazione" valore={`${esito.standard.importoMonetizzazioneTot.toFixed(2)} €`} />
+        <CampoRelazione etichetta="Abitanti teorici" valore={fmtNumero(esito.standard.abitantiTeoriciTot)} />
+        <CampoRelazione etichetta="Fabbisogno parcheggi pubblici" valore={`${fmtNumero(esito.standard.fabbisognoParkPubbliciTot)} mq — ceduti ${fmtNumero(esito.standard.cedutoParkPubblici_mq)} mq — deficit ${fmtNumero(esito.standard.deficitParkPubblici)} mq`} />
+        <CampoRelazione etichetta="Fabbisogno verde/servizi" valore={`${fmtNumero(esito.standard.fabbisognoVerdeServiziTot)} mq — ceduti ${fmtNumero(esito.standard.cedutoVerdeServizi_mq)} mq — deficit ${fmtNumero(esito.standard.deficitVerdeServizi)} mq`} />
+        <CampoRelazione etichetta="Monetizzazione" valore={`${fmtNumero(esito.standard.importoMonetizzazioneTot)} €`} />
         <CampoRelazione etichetta="Esito standard" valore={percorso(stato.standard)} />
 
         <h3>3. Parcheggi privati (L. 122/89)</h3>
-        <CampoRelazione etichetta="Fabbisogno" valore={`${esito.parcheggi.fabbisognoTotalePrivati_mq.toFixed(2)} mq`} />
-        <CampoRelazione etichetta="Realizzo" valore={`${esito.parcheggi.totaleProgettoPrivati_mq.toFixed(2)} mq — manovra ${esito.parcheggi.percManovraReale.toFixed(2)}%`} />
+        <CampoRelazione etichetta="Fabbisogno" valore={`${fmtNumero(esito.parcheggi.fabbisognoTotalePrivati_mq)} mq`} />
+        <CampoRelazione etichetta="Realizzo" valore={`${fmtNumero(esito.parcheggi.totaleProgettoPrivati_mq)} mq — manovra ${fmtNumero(esito.parcheggi.percManovraReale)}%`} />
         <CampoRelazione etichetta="Esito" valore={percorso(stato.parcheggiL122)} />
 
         <h3>4. Copertura, permeabilità, altezze e distanze</h3>
-        <CampoRelazione etichetta="Rapporto di copertura" valore={`${esito.sagoma.rapportoCopertura_perc.toFixed(2)}% (max ${prg.parametriEdificatori.rapportoCoperturaMax_perc}%)`} />
-        <CampoRelazione etichetta="Permeabilità" valore={`${esito.sagoma.indicePermeabilita_perc.toFixed(2)}% (min ${prg.parametriEdificatori.indicePermeabilitaMin_perc}%)`} />
+        <CampoRelazione etichetta="Rapporto di copertura" valore={`${fmtNumero(esito.sagoma.rapportoCopertura_perc)}% (max ${prg.parametriEdificatori.rapportoCoperturaMax_perc}%)`} />
+        <CampoRelazione etichetta="Permeabilità" valore={`${fmtNumero(esito.sagoma.indicePermeabilita_perc)}% (min ${prg.parametriEdificatori.indicePermeabilitaMin_perc}%)`} />
         <CampoRelazione etichetta="Esito suolo/distanze" valore={percorso(stato.suoloDistanze)} />
       </div>
     </div>
