@@ -1,8 +1,9 @@
-import { useRef } from 'react';
-import { Copy, FolderOpen, History, Plus, RotateCcw, Save, Trash2 } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { BarChart3, BookOpen, Copy, FileOutput, FolderOpen, History, Plus, RotateCcw, Save, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
 import type { StatoSemafori } from '../types/urbanistica';
 import type { UnitaDisegno } from '../parsers/dxfParser';
 import type { ProgettoSalvato } from '../utils/persistenza';
+import { ModaleGuida } from './ModaleGuida';
 import { TAB, type IndiceTab } from '../tabs';
 
 interface HeaderProps {
@@ -37,6 +38,19 @@ function Semaforo({ etichetta, conforme }: { etichetta: string; conforme: boolea
 
 export function Header({ prgComune, prgZona, nomeProgetto, unita, onChangeUnita, tab, onChangeTab, stato, salvatoIl, onSalva, onCarica, onReset, progetti, attivoId, onSelectProgetto, onNuovoProgetto, onDuplicaProgetto, onEliminaProgetto }: HeaderProps) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [guidaAperta, setGuidaAperta] = useState(() => !localStorage.getItem('calcoli-urbanistici-guida-vista'));
+
+  const chiudiGuida = () => {
+    localStorage.setItem('calcoli-urbanistici-guida-vista', '1');
+    setGuidaAperta(false);
+  };
+
+  const ICONE_TAB = [
+    <SlidersHorizontal key="0" size={14} />,
+    <UploadCloud key="1" size={14} />,
+    <BarChart3 key="2" size={14} />,
+    <FileOutput key="3" size={14} />,
+  ];
 
   return (
     <header className="app-header">
@@ -98,6 +112,9 @@ export function Header({ prgComune, prgZona, nomeProgetto, unita, onChangeUnita,
             hidden
             onChange={(e) => { const f = e.target.files?.[0]; if (f) onCarica(f); e.target.value = ''; }}
           />
+          <button className="btn-icone btn-guida" title="Guida e tutorial dell'app" onClick={() => setGuidaAperta(true)}>
+            <BookOpen size={15} /> <span className="btn-guida-testo">Guida</span>
+          </button>
           {salvatoIl && (
             <span className="pill salvataggio" title="Salvataggio automatico nel browser">
               <History size={12} /> {new Date(salvatoIl).toLocaleTimeString('it-IT')}
@@ -118,10 +135,12 @@ export function Header({ prgComune, prgZona, nomeProgetto, unita, onChangeUnita,
             className={`tab-btn ${tab === i ? 'attivo' : ''}`}
             onClick={() => onChangeTab(i as IndiceTab)}
           >
+            {ICONE_TAB[i]}
             {i + 1}. {nome}
           </button>
         ))}
       </nav>
+      <ModaleGuida aperta={guidaAperta} onClose={chiudiGuida} />
     </header>
   );
 }

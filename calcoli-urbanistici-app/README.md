@@ -15,6 +15,7 @@ La specifica completa è in [SPEC_PROGETTO.md](./SPEC_PROGETTO.md).
 - **Toast di notifica** al posto degli alert bloccanti per export, import ed eliminazioni.
 - **Controlli di coerenza sugli input** (piani vuoti, Sc > Sf, Sf > St, aree permeabili o parcheggi assenti, altezza/distanze non inserite) visualizzati nel quadro sinottico.
 - **Numeri in formato italiano** (separatore migliaia e virgola decimale) in tutta l'interfaccia e nella relazione stampabile.
+- **Guida integrata** (pulsante "Guida" nell'header): tutorial completo con flusso di lavoro, layer DXF, lettura dei risultati e suggerimenti; si apre automaticamente alla prima visita ed è riapribile in qualsiasi momento.
 - **Export Excel multi-foglio** (`src/utils/exportExcel.ts`) e **relazione stampabile in PDF** (`@media print`).
 
 ## Comandi
