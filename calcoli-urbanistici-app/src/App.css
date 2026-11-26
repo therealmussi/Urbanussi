@@ -277,6 +277,84 @@ select, .input-testo, .input-num {
 .btn-pericolo { color: #fca5a5; }
 .btn-pericolo:hover { border-color: rgba(239, 68, 68, 0.6); }
 
+/* ---------- Accessibilità e rifiniture ---------- */
+:where(button, select, input, textarea, a):focus-visible {
+  outline: 2px solid var(--blu-primario);
+  outline-offset: 2px;
+}
+
+.tab-btn { display: inline-flex; align-items: center; gap: 6px; }
+.tab-btn.attivo { box-shadow: 0 -2px 0 var(--blu-primario) inset; }
+
+.btn-guida { color: #bfdbfe; padding: 5px 10px; }
+.btn-guida:hover { color: #fff; border-color: var(--blu-primario); }
+.btn-guida-testo { font-size: 12.5px; font-weight: 600; }
+@media (max-width: 980px) { .btn-guida-testo { display: none; } }
+
+select, .input-testo, .input-num { transition: border-color 0.15s, background 0.15s; }
+select:hover, .input-testo:hover, .input-num:hover { border-color: #475569; }
+
+/* ---------- Modale guida ---------- */
+.guida-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.guida-modale {
+  background: var(--sfondo-pannelli);
+  border: 1px solid var(--bordo);
+  border-radius: 14px;
+  width: min(760px, 100%);
+  max-height: min(85vh, 900px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  animation: guida-in 0.2s ease-out;
+}
+@keyframes guida-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.guida-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--bordo);
+}
+.guida-head h2 { margin: 0; font-size: 16px; color: #bfdbfe; display: flex; align-items: center; gap: 8px; }
+
+.guida-corpo {
+  overflow-y: auto;
+  padding: 6px 20px 16px;
+}
+.guida-corpo section { padding: 12px 0; border-bottom: 1px dashed var(--bordo); }
+.guida-corpo section:last-child { border-bottom: none; }
+.guida-corpo h3 { margin: 0 0 8px; font-size: 13.5px; color: #93c5fd; }
+.guida-corpo p { margin: 6px 0; font-size: 13.5px; line-height: 1.55; color: var(--testo); }
+.guida-corpo .nota { font-size: 12px; }
+.guida-corpo table { margin-top: 6px; }
+
+.guida-passi { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.guida-passi li { font-size: 13.5px; line-height: 1.55; }
+.guida-elenco { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.guida-elenco li { font-size: 13.5px; line-height: 1.55; }
+
+.guida-foot { padding: 10px 20px; border-top: 1px solid var(--bordo); }
+.guida-foot .firma { margin: 0; font-size: 12px; }
+
+@media print {
+  .guida-backdrop { display: none !important; }
+}
+
 /* ---------- Toast ---------- */
 .toast {
   position: fixed;
