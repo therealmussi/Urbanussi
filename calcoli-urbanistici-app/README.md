@@ -15,6 +15,7 @@ La specifica completa è in [SPEC_PROGETTO.md](./SPEC_PROGETTO.md).
 - **Toast di notifica** al posto degli alert bloccanti per export, import ed eliminazioni.
 - **Controlli di coerenza sugli input** (piani vuoti, Sc > Sf, Sf > St, aree permeabili o parcheggi assenti, altezza/distanze non inserite) visualizzati nel quadro sinottico.
 - **Numeri in formato italiano** (separatore migliaia e virgola decimale) in tutta l'interfaccia e nella relazione stampabile.
+- **Guida integrata** (pulsante "Guida" nell'header): tutorial con flusso di lavoro, layer DXF, lettura dei risultati e suggerimenti, più la sezione **Istruzioni d'uso** con la definizione di ogni indice (Uf/Ut, If/It, Rc, Ip, SLP e scomputi, mix funzionale, abitanti teorici, standard D.M. 1444/68, monetizzazione, L. 122/89): cosa significa, la formula, cosa indica e dove inserirlo nell'app. Con indice navigabile; si apre automaticamente alla prima visita.
 - **Export Excel multi-foglio** (`src/utils/exportExcel.ts`) e **relazione stampabile in PDF** (`@media print`).
 
 ## Comandi
